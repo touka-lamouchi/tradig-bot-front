@@ -369,8 +369,7 @@ export default function BotBuilder({ userId }) {
     setSaving(true);
     try {
       await apiSaveConfig(userId, {
-        mode: tradingMode,
-        cfg: savedCfg,
+        mode: tradingMode === "auto" ? "active" : "viewer",
         maxTradeUsd: savedCfg.maxTrade,
         tradingHoursStart: savedCfg.from,
         tradingHoursEnd: savedCfg.to,
@@ -380,13 +379,13 @@ export default function BotBuilder({ userId }) {
         chartPatterns: savedCfg.chartPatterns,
         socialBuzz: savedCfg.socialBuzz,
         copyWhales: savedCfg.copyWhales,
-        slippageMax: savedCfg.slippageMax,
         dailyLimitUsd: savedCfg.dailyLossLimit,
       });
       localStorage.setItem("nx-cfg", JSON.stringify({ mode: tradingMode, cfg: savedCfg }));
       setDirty(false);
     } catch (err) {
       console.error("Failed to save config:", err);
+      alert("Save failed: " + err.message);
     } finally {
       setSaving(false);
     }
@@ -398,8 +397,12 @@ export default function BotBuilder({ userId }) {
       apiGetConfig(userId)
         .then((data) => {
           if (data && data.mode) {
-            setTradingMode(data.mode);
-            setSavedCfg(data.cfg || data);
+            setTradingMode(data.mode === "active" ? "auto" : "manual");
+            setSavedCfg({
+              ...(data.cfg || data),
+              from: data.tradingHoursStart ?? (data.cfg?.from ?? "00:00"),
+              to: data.tradingHoursEnd ?? (data.cfg?.to ?? "23:59"),
+            });
           } else {
             // Nothing on backend, check localStorage
             const s = localStorage.getItem("nx-cfg");
@@ -440,8 +443,7 @@ export default function BotBuilder({ userId }) {
     // Also save to backend
     if (userId) {
       apiSaveConfig(userId, {
-        mode,
-        cfg,
+        mode: mode === "auto" ? "active" : "viewer",
         maxTradeUsd: cfg.maxTrade,
         dailyLimitUsd: cfg.dailyLossLimit || 500,
         tradingHoursStart: cfg.from,

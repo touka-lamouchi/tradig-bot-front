@@ -172,10 +172,14 @@ function DecisionPanel({ decision, news }) {
           const v = b[k] ?? 0.5;
           const pct = Math.round(v * 100);
           const tone = v > 0.55 ? "var(--green)" : v < 0.45 ? "var(--red)" : "var(--text3)";
+          const sentiment = v > 0.55 ? "Bullish" : v < 0.45 ? "Bearish" : "Neutral";
           return (
             <div key={k} style={{ background: "var(--bg2)", padding: "10px 12px", borderRadius: 8 }}>
               <div style={{ fontSize: 10, color: "var(--text3)", marginBottom: 4 }}>{label}</div>
-              <div style={{ fontSize: 16, fontWeight: 800, color: tone }}>{pct}%</div>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                <div style={{ fontSize: 16, fontWeight: 800, color: tone }}>{pct}%</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: tone, textTransform: "uppercase", letterSpacing: ".6px" }}>{sentiment}</div>
+              </div>
               <div style={{ height: 3, background: "var(--bg)", borderRadius: 2, marginTop: 6, overflow: "hidden" }}>
                 <div style={{ width: `${pct}%`, height: "100%", background: tone }} />
               </div>

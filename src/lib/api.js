@@ -56,6 +56,11 @@ export async function apiSaveConfig(userId, config) {
     headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(config),
   });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    const details = err.details?.map(d => `${d.path}: ${d.message}`).join(", ") || "";
+    throw new Error(`${err.error || `Save failed (${res.status})`}${details ? " — " + details : ""}`);
+  }
   return res.json();
 }
 
